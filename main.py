@@ -10,8 +10,8 @@ app = Flask(__name__)
 def main():
     event_json = request.get_json()
     signature = request.headers['X-Hub-Signature'].split('=')[1]
-    REQUIRED_ALL = request.args.get('requierd_all')
-    REQUIRED_ANY = request.args.get('requierd_any')
+    REQUIRED_ALL = request.args.get('required_all')
+    REQUIRED_ANY = request.args.get('required_any')
     BANNED = request.args.get('banned')
 
     if not webhook_signature_is_valid(GITHUB_SECRET, request.data, signature):
