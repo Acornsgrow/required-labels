@@ -10,16 +10,22 @@ app = Flask(__name__)
 def main():
     event_json = request.get_json()
     signature = request.headers['X-Hub-Signature'].split('=')[1]
-    
+    REQUIRED_ALL = request.args.get('requierd_all')
+    REQUIRED_ANY = request.args.get('requierd_any')
+    BANNED = request.args.get('banned')
+
     if not webhook_signature_is_valid(GITHUB_SECRET, request.data, signature):
         return Response(
-        'Could not verify your access level for that URL.\n', 
+        'Could not verify your access level for that URL.\n',
         401)
 
     if event_warrants_label_check(event_json):
         pull_request = PullRequest(event_json)
         print("Checking labels for PR {}".format(pull_request.issue_url))
-        status_code = pull_request.compute_and_post_status(REQUIRED_LABELS_ANY, REQUIRED_LABELS_ALL, BANNED_LABELS)
+        if REQUIRED_ALL or REQUIRED_ANY:
+            status_code = pull_request.compute_and_post_status(REQUIRED_ALL, REQUIRED_ANY, BANNED)
+        else:
+            status_code = pull_request.compute_and_post_status(REQUIRED_LABELS_ANY, REQUIRED_LABELS_ALL, BANNED_LABELS)
         return str(status_code)
     else:
         return 'No label check needed'
